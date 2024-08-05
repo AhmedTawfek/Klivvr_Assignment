@@ -9,6 +9,9 @@ import androidx.lifecycle.viewModelScope
 import com.tawfek.klivvr_project.data.city.json_data_source.JsonDataSource
 import com.tawfek.klivvr_project.data.city.trie_data_source.Trie
 import com.tawfek.klivvr_project.domain.city.model.City
+import com.tawfek.klivvr_project.domain.city.use_cases.ParseDataUseCase
+import com.tawfek.klivvr_project.domain.city.use_cases.SortListUseCase
+import com.tawfek.klivvr_project.domain.city.use_cases.TrieUseCases
 import com.tawfek.klivvr_project.presentation.ui.utils.FileUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -22,28 +25,31 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     context: Application,
-    private val jsonDataSource: JsonDataSource = JsonDataSource(),
-    private val fileUtils: FileUtils = FileUtils()
+    private val parseDataUseCase: ParseDataUseCase,
+    private val trieUseCases: TrieUseCases,
+    private val sortListUseCase: SortListUseCase,
+    private val fileUtils: FileUtils
 ) : AndroidViewModel(context) {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
-
-    private val trie = Trie()
 
     init {
         // Running the parsing operation in IO thread, so we don't block the main Thread.
         viewModelScope.launch(Dispatchers.IO) {
             Log.d("Search","Parsing json file.")
             val inputStream = fileUtils.openInputStream(context, JsonDataSource.JSON_FILE_NAME)
-            val parsedCities = jsonDataSource.parseJsonToCitiesList(inputStream)
+            val parsedCities = parseDataUseCase(inputStream)
+
             Log.d("Search","Adding parsed objects to the Trie data structure.")
+
             for (city in parsedCities) {
-                trie.insert(city)
+                trieUseCases.insertUseCase(city)
             }
             Log.d("Search","Trie data structure is now ready.")
+
             _uiState.update {
-                it.copy(loadingState = LoadingUiState.Idle, cities = parsedCities)
+                it.copy(loadingState = LoadingUiState.Idle, cities = sortListUseCase(parsedCities))
             }
         }
     }
@@ -52,9 +58,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(loadingState = LoadingUiState.Loading) }
 
-            val cities = trie.search(query)
+            val sortedCities = trieUseCases.searchUseCase(query)
+
             _uiState.update {
-                it.copy(loadingState = LoadingUiState.Idle, cities = cities, searchQuery = query)
+                it.copy(loadingState = LoadingUiState.Idle, cities = sortedCities, searchQuery = query)
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.tawfek.klivvr_project.data.city.trie_data_source
 
+import com.tawfek.klivvr_project.data.city.model.CityEntity
 import com.tawfek.klivvr_project.domain.city.model.City
-import com.tawfek.klivvr_project.domain.city.model.Country
 
 /*
  * The requirements says that we need the search algorithm to be faster than linear
@@ -13,13 +13,13 @@ import com.tawfek.klivvr_project.domain.city.model.Country
 data class TrieNode(
     val children: MutableMap<Char, TrieNode> = mutableMapOf(),
     var isEndOfWord: Boolean = false,
-    var cityData: City? = null
+    var cityData: CityEntity? = null
 )
 
 class Trie {
     private val root = TrieNode()
 
-    fun insert(city: City) {
+    fun insert(city: CityEntity) {
         var node = root
         for (char in city.name.lowercase()) {
             node = node.children.getOrPut(char) { TrieNode() }
@@ -28,8 +28,8 @@ class Trie {
         node.cityData = city
     }
 
-    fun search(prefix: String): List<City> {
-        val results = mutableListOf<City>()
+    fun search(prefix: String): List<CityEntity> {
+        val results = mutableListOf<CityEntity>()
         var node = root
         for (char in prefix.lowercase()) {
             if (char !in node.children) return results
@@ -42,7 +42,7 @@ class Trie {
         return results
     }
 
-    private fun collectAllCities(node: TrieNode, results: MutableList<City>) {
+    private fun collectAllCities(node: TrieNode, results: MutableList<CityEntity>) {
         if (node.isEndOfWord) {
             node.cityData?.let { results.add(it) }
         }
