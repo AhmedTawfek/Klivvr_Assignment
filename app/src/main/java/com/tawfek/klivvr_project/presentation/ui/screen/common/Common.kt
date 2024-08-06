@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ShimmerEffect(modifier: Modifier = Modifier) {
     // Simulating as a shimmer effect.
-    // I will not create a real shimmer effect because it would take a lot of time ... :(
+    // I will not create a real shimmer effect because it would take much time ... :(
     Text(text = "IAM A SHIMMER :)")
     Spacer(modifier = Modifier.height(10.dp))
     CircularProgressIndicator(modifier = modifier,color = Color.Gray)

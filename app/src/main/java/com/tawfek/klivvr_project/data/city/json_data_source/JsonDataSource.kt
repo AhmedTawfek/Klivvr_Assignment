@@ -6,9 +6,10 @@ import com.tawfek.klivvr_project.domain.city.model.City
 import java.io.InputStream
 import javax.inject.Inject
 
-// Usually in the data package we have our data sources which could be [ Remote, Local, etc. ]
-// Our data source here is from a json file, so i called it a json_data_source.
-
+ /*
+ * Usually in the data package we have our data sources which could be [ Remote, Local, etc. ]
+ * Our data source here is from a json file, so i called it a json_data_source.
+ */
 class JsonDataSource{
 
     suspend fun parseJsonToCitiesList(inputStream: InputStream): List<CityEntity> {
